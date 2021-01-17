@@ -85,6 +85,7 @@ glob.sync('posts/*.md').forEach(postFile => {
     path.join('site', 'posts', `${slug}.html`),
     templates.post({
       blogTitle: meta.title,
+      blogDescription: meta.description,
       socialImage: meta.socialImage,
       title: data.title,
       description: data.description,
@@ -112,6 +113,7 @@ Object.keys(tags).forEach(text => {
     path.join('site', 'tags', `${slug}.html`),
     templates.tag({
       blogTitle: meta.title,
+      blogDescription: meta.description,
       socialImage: meta.socialImage,
       title: `Tag: “${text}”`,
       description: 'list of tagged posts',
@@ -129,6 +131,7 @@ fs.writeFileSync(
   path.join('site', 'tags', 'index.html'),
   templates.tags({
     blogTitle: meta.title,
+    blogDescription: meta.description,
     socialImage: meta.socialImage,
     title: 'Tags',
     description: 'list of tags',
@@ -152,6 +155,7 @@ if (Object.keys(series).length !== 0) {
       path.join('site', 'series', `${slug}.html`),
       templates.series({
         blogTitle: meta.title,
+        blogDescription: meta.description,
         socialImage: meta.socialImage,
         title: `Series: “${text}”`,
         description: 'list of posts in series',
@@ -186,6 +190,7 @@ glob.sync('pages/*.md').forEach(pageFile => {
     path.join('site', 'pages', `${slug}.html`),
     templates.page({
       blogTitle: meta.title,
+      blogDescription: meta.description,
       socialImage: meta.socialImage,
       title: data.title,
       description: data.description,
@@ -201,6 +206,7 @@ fs.writeFileSync(
   path.join('site', 'index.html'),
   templates.index({
     blogTitle: meta.title,
+    blogDescription: meta.description,
     socialImage: meta.socialImage,
     title: meta.title,
     description: meta.description,
