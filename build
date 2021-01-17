@@ -290,6 +290,6 @@ function byDateDescending (a, b) {
 function toSlug (tag) {
   return tag
     .toLowerCase()
-    .replace(/ /, '-')
-    .replace(/[^a-zA-Z0-9]/, '')
+    .replace(/ /g, '-')
+    .replace(/[^a-z0-9-]/g, '')
 }
