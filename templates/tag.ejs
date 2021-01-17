@@ -6,14 +6,12 @@
 </head>
 <body>
   <%- include('header') %>
+  <%- include('nav') %>
   <main role=main>
     <h2>Tag: <%= text %></h2>
     <ol class=posts>
     <% for (const post of posts) { %>
-      <li>
-        <a href="<%- post.href %>"><%= post.title %></a>
-        <time datetime="<%= post.dateObject.toISOString() %>"><%= post.dateString %></time>
-      </li>
+      <%- include('post-li', { post }) %>
     <% } %>
     </ol>
   </main>

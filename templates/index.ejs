@@ -10,11 +10,7 @@
   <main role=main>
     <ol class=posts>
     <% for (const post of posts) { %>
-      <li>
-        <a href="<%- post.href %>"><%= post.title %></a>
-        <time datetime="<%= post.dateObject.toISOString() %>"><%= post.dateString %></time>
-        <% if (post.description) { %><p class=description><%= post.description %></p><% } %>
-      </li>
+      <%- include('post-li', { post }) %>
     <% } %>
     </ol>
   </main>

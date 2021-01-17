@@ -118,16 +118,7 @@ Object.keys(tags).forEach(text => {
       text,
       slug,
       posts: tags[text]
-        .map(slug => {
-          const record = posts[slug]
-          return {
-            href: record.href,
-            title: record.title,
-            description: record.description,
-            dateObject: record.dateObject,
-            dateString: record.dateString
-          }
-        })
+        .map(slug => posts[slug])
         .sort(byDateDescending)
     })
   )
