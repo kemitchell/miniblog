@@ -9,6 +9,6 @@
     "rss": "^1.2.2"
   },
   "scripts": {
-    "build": "node build"
+    "build": "node build | tee build.log"
   }
 }
