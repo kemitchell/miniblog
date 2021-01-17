@@ -140,7 +140,8 @@ fs.writeFileSync(
       return {
         text,
         slug,
-        href: `/tags/${encodeURIComponent(slug)}`
+        href: `/tags/${encodeURIComponent(slug)}`,
+        postCount: tags[text].length
       }
     })
   })

@@ -13,6 +13,7 @@
     <% for (const tag of tags) { %>
       <li>
         <a href="<%- tag.href %>"><%= tag.text %></a>
+        (<%= tag.postCount %> <%- tag.postCount === 1 ? 'post' : 'posts' %>)
       </li>
     <% } %>
     </ol>
