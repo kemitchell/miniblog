@@ -185,7 +185,11 @@ function renderMarkdown (markdown) {
 
 const feed = new RSS({
   title: meta.title,
-  description: meta.description
+  description: meta.description,
+  site_url: meta.url,
+  feed_url: meta.url + '/feed.xml',
+  language: 'en',
+  generator: 'miniblog'
 })
 Object.values(posts)
   .sort(byDateDescending)
@@ -193,7 +197,8 @@ Object.values(posts)
     feed.item({
       title: post.title,
       description: post.description,
-      date: post.dateObject.toISOString()
+      date: post.dateObject.toISOString(),
+      url: meta.url + post.href
     })
   })
 fs.writeFileSync(
