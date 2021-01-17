@@ -8,6 +8,7 @@ const glob = require('glob')
 const grayMatter = require('gray-matter')
 const path = require('path')
 const rimraf = require('rimraf')
+const spawnSync = require('child_process').spawnSync
 
 // Remove and recreate web root.
 rimraf.sync('site')
@@ -188,6 +189,13 @@ fs.writeFileSync(
   path.join('site', 'feed.xml'),
   feed.xml({ indent: true })
 )
+
+// Format pages.
+const tidyArguments = ['-indent', '--indent-spaces', '2', '--tidy-mark', 'no', '--wrap', '0', '-modify']
+glob.sync('site/**/*.html').forEach(file => {
+  console.log(tidyArguments.concat(file))
+  spawnSync('tidy', tidyArguments.concat(file))
+})
 
 // Helper Functions
 
