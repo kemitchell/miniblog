@@ -69,15 +69,14 @@ glob.sync('posts/*.md').forEach(postFile => {
   }
 
   // Index tags.
-  data.tags.forEach(tag => {
-    if (!tags[tag]) tags[tag] = [slug]
-    else tags[tag].push(slug)
-  })
+  data.tags.forEach(tag => index(tags, tag))
 
   // Index series.
-  if (data.series) {
-    if (!series[data.series]) series[data.series] = [slug]
-    else series[data.series].push(slug)
+  if (data.series) index(series, data.series)
+
+  function index (object, key) {
+    if (!Array.isArray(object[key])) object[key] = [slug]
+    else object[key].push(slug)
   }
 
   // Write post page.
