@@ -56,6 +56,7 @@ postSources.forEach(postFile => {
     path.join('site', 'posts', `${slug}.html`),
     templates.post({
       blogTitle: meta.title,
+      socialImage: meta.socialImage,
       title: data.title,
       description: data.description,
       dateObject,
@@ -80,6 +81,9 @@ Object.keys(tags).forEach(text => {
     path.join('site', 'tags', `${slug}.html`),
     templates.tag({
       blogTitle: meta.title,
+      socialImage: meta.socialImage,
+      title: `Tag: “${text}”`,
+      description: 'list of tagged posts',
       text,
       slug,
       posts: tags[text]
@@ -103,6 +107,9 @@ fs.writeFileSync(
   path.join('site', 'tags', 'index.html'),
   templates.tags({
     blogTitle: meta.title,
+    socialImage: meta.socialImage,
+    title: 'Tags',
+    description: 'list of tags',
     tags: Object.keys(tags).map(text => {
       const slug = tagToSlug(text)
       return {
@@ -136,6 +143,7 @@ pageSources.forEach(pageFile => {
     path.join('site', 'pages', `${slug}.html`),
     templates.page({
       blogTitle: meta.title,
+      socialImage: meta.socialImage,
       title: data.title,
       description: data.description,
       dateObject,
@@ -150,6 +158,8 @@ fs.writeFileSync(
   path.join('site', 'index.html'),
   templates.index({
     blogTitle: meta.title,
+    socialImage: meta.socialImage,
+    title: meta.title,
     description: meta.description,
     posts: Object.values(posts).sort(byDateDescending)
   })

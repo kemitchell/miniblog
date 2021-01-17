@@ -2,3 +2,29 @@
 <meta name=viewport content="width=device-width, initial-scale=1">
 <link href=/styles.css rel=stylesheet>
 <link rel=alternate href=/feed.xml type=application/atom+xml>
+
+<meta name="twitter:card" content="summary">
+<% if (title) { %>
+<meta name="twitter:title" content="<%= title %>">
+<% } else { %>
+<meta name="twitter:title" content="<%= blogTitle %>">
+<% } %>
+<% if (description) { %>
+<meta name="twitter:description" content="<%= description %>">
+<% } %>
+<% if (socialImage) { %>
+<meta name="twitter:image" content="<%= socialImage %>">
+<% } %>
+
+<meta name="og:type" content="website">
+<% if (title) { %>
+<meta name="og:title" content="<%= title %>">
+<% } else { %>
+<meta name="og:title" content="<%= blogTitle %>">
+<% } %>
+<% if (description) { %>
+<meta name="og:description" content="<%= description %>">
+<% } %>
+<% if (socialImage) { %>
+<meta name="og:image" content="<%= socialImage %>">
+<% } %>
