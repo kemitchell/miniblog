@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang=en-US>
+<head>
+  <%- include('meta') %>
+  <title><%= title %></title>
+</head>
+<body>
+  <%- include('header') %>
+  <%- include('nav') %>
+  <main role=main>
+    <h2><%= title %></h2>
+    <% if (description) { %><p class=description><%= description %></p><% } %>
+    <%- contentHTML %>
+  </main>
+  <%- include('footer') %>
+</body>
+</html>

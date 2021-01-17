@@ -114,6 +114,37 @@ fs.writeFileSync(
   })
 )
 
+const pages = {}
+
+fs.mkdirSync(path.join('site', 'pages'))
+const pageSources = glob.sync('pages/*.md')
+pageSources.forEach(pageFile => {
+  const slug = path.basename(pageFile, '.md')
+  const read = fs.readFileSync(pageFile, 'utf8')
+  const { data, content } = grayMatter(read)
+  const dateObject = new Date(data.date)
+  const dateString = displayDate(dateObject)
+  pages[slug] = {
+    title: data.title,
+    description: data.description,
+    dateObject,
+    dateString,
+    href: `/pages/${slug}`
+  }
+  // Write page.
+  fs.writeFileSync(
+    path.join('site', 'pages', `${slug}.html`),
+    templates.page({
+      blogTitle: meta.title,
+      title: data.title,
+      description: data.description,
+      dateObject,
+      dateString,
+      contentHTML: renderMarkdown(content)
+    })
+  )
+})
+
 // Write index.
 fs.writeFileSync(
   path.join('site', 'index.html'),
