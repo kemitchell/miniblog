@@ -173,7 +173,10 @@ function renderMarkdown (markdown) {
   return writer.render(parsed)
 }
 
-const feed = new RSS({ title: meta.title, description: meta.description })
+const feed = new RSS({
+  title: meta.title,
+  description: meta.description
+})
 Object.values(posts)
   .sort(byDateDescending)
   .forEach(post => {
