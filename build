@@ -9,14 +9,17 @@ const grayMatter = require('gray-matter')
 const path = require('path')
 const rimraf = require('rimraf')
 
+// Remove and recreate web root.
 rimraf.sync('site')
 fs.mkdirSync('site')
 
+// Copy static files.
 glob.sync('static/*').forEach(staticFile => {
   const basename = path.basename(staticFile)
   fs.copyFileSync(staticFile, path.join('site', basename))
 })
 
+// Read and compile templates.
 const templates = {}
 glob.sync('templates/*.ejs').forEach(templateFile => {
   const basename = path.basename(templateFile, '.ejs')
@@ -27,15 +30,18 @@ glob.sync('templates/*.ejs').forEach(templateFile => {
   })
 })
 
+// Read and index posts.
 const posts = {}
 const tags = {}
 
 fs.mkdirSync(path.join('site', 'posts'))
-const postSources = glob.sync('posts/*.md')
-postSources.forEach(postFile => {
+
+glob.sync('posts/*.md').forEach(postFile => {
   const slug = path.basename(postFile, '.md')
   const read = fs.readFileSync(postFile, 'utf8')
   const { data, content } = grayMatter(read)
+
+  // Save metadata in memory.
   const dateObject = new Date(data.date)
   const dateString = displayDate(dateObject)
   posts[slug] = {
@@ -46,11 +52,13 @@ postSources.forEach(postFile => {
     tags: data.tags,
     href: `/posts/${slug}`
   }
+
   // Index tags.
   data.tags.forEach(tag => {
     if (!tags[tag]) tags[tag] = [slug]
     else tags[tag].push(slug)
   })
+
   // Write post page.
   fs.writeFileSync(
     path.join('site', 'posts', `${slug}.html`),
@@ -73,7 +81,7 @@ postSources.forEach(postFile => {
   )
 })
 
-// Write tags pages.
+// Write tag pages.
 fs.mkdirSync('site/tags')
 Object.keys(tags).forEach(text => {
   const slug = tagToSlug(text)
@@ -102,7 +110,7 @@ Object.keys(tags).forEach(text => {
   )
 })
 
-// Write tags index.
+// Write tag index.
 fs.writeFileSync(
   path.join('site', 'tags', 'index.html'),
   templates.tags({
@@ -121,24 +129,14 @@ fs.writeFileSync(
   })
 )
 
-const pages = {}
-
+// Render static pages.
 fs.mkdirSync(path.join('site', 'pages'))
-const pageSources = glob.sync('pages/*.md')
-pageSources.forEach(pageFile => {
+glob.sync('pages/*.md').forEach(pageFile => {
   const slug = path.basename(pageFile, '.md')
   const read = fs.readFileSync(pageFile, 'utf8')
   const { data, content } = grayMatter(read)
   const dateObject = new Date(data.date)
   const dateString = displayDate(dateObject)
-  pages[slug] = {
-    title: data.title,
-    description: data.description,
-    dateObject,
-    dateString,
-    href: `/pages/${slug}`
-  }
-  // Write page.
   fs.writeFileSync(
     path.join('site', 'pages', `${slug}.html`),
     templates.page({
@@ -153,7 +151,7 @@ pageSources.forEach(pageFile => {
   )
 })
 
-// Write index.
+// Write blog index.
 fs.writeFileSync(
   path.join('site', 'index.html'),
   templates.index({
@@ -165,24 +163,7 @@ fs.writeFileSync(
   })
 )
 
-function byDateDescending (a, b) {
-  return Date.parse(b.date) - Date.parse(a.date)
-}
-
-function tagToSlug (tag) {
-  return tag
-    .toLowerCase()
-    .replace(/ /, '-')
-    .replace(/[^a-zA-Z0-9]/, '')
-}
-
-function renderMarkdown (markdown) {
-  const reader = new commonmark.Parser({ smart: true })
-  const writer = new commonmark.HtmlRenderer()
-  const parsed = reader.parse(markdown)
-  return writer.render(parsed)
-}
-
+// Write Atom/RSS feed.
 const feed = new RSS({
   title: meta.title,
   description: meta.description,
@@ -191,6 +172,7 @@ const feed = new RSS({
   language: 'en',
   generator: 'miniblog'
 })
+
 Object.values(posts)
   .sort(byDateDescending)
   .forEach(post => {
@@ -201,10 +183,20 @@ Object.values(posts)
       url: meta.url + post.href
     })
   })
+
 fs.writeFileSync(
   path.join('site', 'feed.xml'),
   feed.xml({ indent: true })
 )
+
+// Helper Functions
+
+function renderMarkdown (markdown) {
+  const reader = new commonmark.Parser({ smart: true })
+  const writer = new commonmark.HtmlRenderer()
+  const parsed = reader.parse(markdown)
+  return writer.render(parsed)
+}
 
 function displayDate (date) {
   const months = [
@@ -228,4 +220,16 @@ function displayDate (date) {
   const options = { hour12: false, hour: '2-digit', minute: '2-digit' }
   returned += ` @ ${date.toLocaleTimeString('en-US', options)}`
   return returned
+}
+
+// Sort posts in reverse chronological order.
+function byDateDescending (a, b) {
+  return Date.parse(b.date) - Date.parse(a.date)
+}
+
+function tagToSlug (tag) {
+  return tag
+    .toLowerCase()
+    .replace(/ /, '-')
+    .replace(/[^a-zA-Z0-9]/, '')
 }
