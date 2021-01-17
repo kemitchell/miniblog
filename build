@@ -1,0 +1,131 @@
+#!node
+const commonmark = require('commonmark')
+const ejs = require('ejs')
+const fs = require('fs')
+const glob = require('glob')
+const grayMatter = require('gray-matter')
+const path = require('path')
+const rimraf = require('rimraf')
+
+rimraf.sync('site')
+fs.mkdirSync('site')
+
+glob.sync('static/*').forEach(staticFile => {
+  const basename = path.basename(staticFile)
+  fs.copyFileSync(staticFile, path.join('site', basename))
+})
+
+const templates = {}
+glob.sync('templates/*.ejs').forEach(templateFile => {
+  const basename = path.basename(templateFile, '.ejs')
+  const content = fs.readFileSync(templateFile, 'utf8')
+  templates[basename] = ejs.compile(content, {
+    filename: templateFile,
+    views: [path.resolve('includes')]
+  })
+})
+
+const posts = {}
+const tags = {}
+
+const postSources = glob.sync('posts/*.md')
+postSources.forEach(postFile => {
+  const slug = path.basename(postFile, '.md')
+  const read = fs.readFileSync(postFile, 'utf8')
+  const { data, content } = grayMatter(read)
+  posts[slug] = {
+    title: data.title,
+    subtitle: data.subtitle,
+    date: new Date(data.date),
+    tags: data.tags,
+    href: `/${slug}`
+  }
+  // Index tags.
+  data.tags.forEach(tag => {
+    if (!tags[tag]) tags[tag] = [slug]
+    else tags[tag].push(slug)
+  })
+  // Render post.
+  fs.writeFileSync(
+    path.join('site', `${slug}.html`),
+    templates.post({
+      title: data.title,
+      subtitle: data.subtitle,
+      date: data.date,
+      tags: data.tags.map(text => {
+        return {
+          text,
+          slug: tagToSlug(text),
+          href: `/tags/${encodeURIComponent(slug)}`
+        }
+      }),
+      contentHTML: renderMarkdown(content)
+    })
+  )
+})
+
+// Write tags pages.
+fs.mkdirSync('site/tags')
+Object.keys(tags).forEach(text => {
+  const slug = tagToSlug(text)
+  fs.writeFileSync(
+    path.join('site', 'tags', `${slug}.html`),
+    templates.tag({
+      text,
+      slug,
+      posts: tags[text]
+        .map(slug => {
+          const record = posts[slug]
+          return {
+            href: `/${slug}`,
+            title: record.title,
+            subtitle: record.subtitle,
+            date: record.date
+          }
+        })
+        .sort(byDateDescending)
+    })
+  )
+})
+
+// Write tags index.
+fs.writeFileSync(
+  path.join('site', 'tags', 'index.html'),
+  templates.tags({
+    tags: Object.keys(tags).map(text => {
+      const slug = tagToSlug(text)
+      return {
+        text,
+        slug,
+        href: `/tags/${encodeURIComponent(slug)}`
+      }
+    })
+  })
+)
+
+// Write index.
+fs.writeFileSync(
+  path.join('site', 'index.html'),
+  templates.index({
+    title: 'Blog Title',
+    posts: Object.values(posts).sort(byDateDescending)
+  })
+)
+
+function byDateDescending (a, b) {
+  return Date.parse(b.date) - Date.parse(a.date)
+}
+
+function tagToSlug (tag) {
+  return tag
+    .toLowerCase()
+    .replace(/ /, '-')
+    .replace(/[^a-zA-Z0-9]/, '')
+}
+
+function renderMarkdown (markdown) {
+  const reader = new commonmark.Parser({ smart: true })
+  const writer = new commonmark.HtmlRenderer()
+  const parsed = reader.parse(markdown)
+  return writer.render(parsed)
+}

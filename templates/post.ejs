@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang=en-US>
+<head>
+  <%- include('meta') %>
+  <title><%= title %></title>
+</head>
+<body>
+  <%- include('header') %>
+  <%- include('nav') %>
+  <main role=main>
+    <h2><%= title %></h2>
+    <% if (subtitle) { %><p class=subtitle><%= subtitle %></p><% } %>
+    <% if (date) { %><p class=dateline><%= date %></p><% } %>
+    <ul class=tags>
+    <% for (const tag of tags) { %>
+    <li><a href="<%- tag.href %>"><%= tag.text %></a></li>
+    <% } %>
+    </ul>
+    <%- contentHTML %>
+  </main>
+  <%- include('footer') %>
+</body>
+</html>

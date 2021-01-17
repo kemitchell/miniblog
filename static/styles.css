@@ -1,0 +1,15 @@
+html {
+  line-height: 1.7;
+}
+
+.posts,
+.tags,
+nav[role=navigation] ol {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+nav[role=navigation] li {
+  display: inline-block;
+}

@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+if [ ! -d node_modules ]; then
+  npm ci
+fi
+npm run build
+site=example.com
+rsync -a --delete site/ "$site:/var/www/$site/"
