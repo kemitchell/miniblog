@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang=en-US>
+<head>
+  <%- include('meta') %>
+  <title><%= text %></title>
+</head>
+<body>
+  <%- include('header') %>
+  <main role=main>
+    <h2>Series: <%= text %></h2>
+    <ol class=posts>
+    <% for (const post of posts) { %>
+      <li>
+        <a href="<%- post.href %>"><%= post.title %></a>
+        <time datetime="<%= post.dateObject.toISOString() %>"><%= post.dateString %></time>
+      </li>
+    <% } %>
+    </ol>
+  </main>
+  <%- include('footer') %>
+</body>
+</html>

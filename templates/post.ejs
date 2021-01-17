@@ -11,6 +11,9 @@
     <h2><%= title %></h2>
     <% if (description) { %><p class=description><%= description %></p><% } %>
     <time class=dateline datetime=<%- dateObject.toISOString() %>><%= dateString %></time>
+    <% if (series) { %>
+    <p class=series>This post is part of a series, <a href="<%= seriesHREF %>"><%= series %></a>.</p>
+    <% } %>
     <ul class=tags>
     <% for (const tag of tags) { %>
     <li><a href="<%- tag.href %>"><%= tag.text %></a></li>

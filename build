@@ -34,23 +34,37 @@ glob.sync('templates/*.ejs').forEach(templateFile => {
 // Read and index posts.
 const posts = {}
 const tags = {}
+const series = {}
 
 fs.mkdirSync(path.join('site', 'posts'))
+
+const defaultMetadata = {
+  series: null,
+  tags: []
+}
 
 glob.sync('posts/*.md').forEach(postFile => {
   const slug = path.basename(postFile, '.md')
   const read = fs.readFileSync(postFile, 'utf8')
   const { data, content } = grayMatter(read)
+  Object.keys(defaultMetadata).forEach(key => {
+    if (!data[key]) data[key] = defaultMetadata[key]
+  })
 
   // Save metadata in memory.
   const dateObject = new Date(data.date)
   const dateString = displayDate(dateObject)
+  const seriesHREF = data.series
+    ? `/series/${toSlug(data.series)}`
+    : null
   posts[slug] = {
     title: data.title,
     description: data.description,
     dateObject,
     dateString,
     tags: data.tags,
+    series: data.series,
+    seriesHREF,
     href: `/posts/${slug}`
   }
 
@@ -59,6 +73,12 @@ glob.sync('posts/*.md').forEach(postFile => {
     if (!tags[tag]) tags[tag] = [slug]
     else tags[tag].push(slug)
   })
+
+  // Index series.
+  if (data.series) {
+    if (!series[data.series]) series[data.series] = [slug]
+    else series[data.series].push(slug)
+  }
 
   // Write post page.
   fs.writeFileSync(
@@ -70,10 +90,12 @@ glob.sync('posts/*.md').forEach(postFile => {
       description: data.description,
       dateObject,
       dateString,
+      series: data.series,
+      seriesHREF,
       tags: data.tags.map(text => {
         return {
           text,
-          slug: tagToSlug(text),
+          slug: toSlug(text),
           href: `/tags/${encodeURIComponent(slug)}`
         }
       }),
@@ -85,7 +107,7 @@ glob.sync('posts/*.md').forEach(postFile => {
 // Write tag pages.
 fs.mkdirSync('site/tags')
 Object.keys(tags).forEach(text => {
-  const slug = tagToSlug(text)
+  const slug = toSlug(text)
   fs.writeFileSync(
     path.join('site', 'tags', `${slug}.html`),
     templates.tag({
@@ -120,7 +142,7 @@ fs.writeFileSync(
     title: 'Tags',
     description: 'list of tags',
     tags: Object.keys(tags).map(text => {
-      const slug = tagToSlug(text)
+      const slug = toSlug(text)
       return {
         text,
         slug,
@@ -129,6 +151,37 @@ fs.writeFileSync(
     })
   })
 )
+
+if (Object.keys(series).length !== 0) {
+  // Write series pages.
+  fs.mkdirSync(path.join('site', 'series'))
+  Object.keys(series).forEach(text => {
+    const slug = toSlug(text)
+    fs.writeFileSync(
+      path.join('site', 'series', `${slug}.html`),
+      templates.series({
+        blogTitle: meta.title,
+        socialImage: meta.socialImage,
+        title: `Series: “${text}”`,
+        description: 'list of posts in series',
+        text,
+        slug,
+        posts: series[text]
+          .map(slug => {
+            const record = posts[slug]
+            return {
+              href: record.href,
+              title: record.title,
+              description: record.description,
+              dateObject: record.dateObject,
+              dateString: record.dateString
+            }
+          })
+          .sort(byDateDescending)
+      })
+    )
+  })
+}
 
 // Render static pages.
 fs.mkdirSync(path.join('site', 'pages'))
@@ -234,7 +287,7 @@ function byDateDescending (a, b) {
   return b.dateObject - a.dateObject
 }
 
-function tagToSlug (tag) {
+function toSlug (tag) {
   return tag
     .toLowerCase()
     .replace(/ /, '-')
