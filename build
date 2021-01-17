@@ -193,7 +193,6 @@ fs.writeFileSync(
 // Format pages.
 const tidyArguments = ['-indent', '--indent-spaces', '2', '--tidy-mark', 'no', '--wrap', '0', '-modify']
 glob.sync('site/**/*.html').forEach(file => {
-  console.log(tidyArguments.concat(file))
   spawnSync('tidy', tidyArguments.concat(file))
 })
 
