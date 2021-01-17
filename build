@@ -231,7 +231,7 @@ function displayDate (date) {
 
 // Sort posts in reverse chronological order.
 function byDateDescending (a, b) {
-  return Date.parse(b.date) - Date.parse(a.date)
+  return b.dateObject - a.dateObject
 }
 
 function tagToSlug (tag) {
