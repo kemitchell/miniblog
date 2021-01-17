@@ -1,4 +1,6 @@
 #!node
+const meta = require('./meta')
+const RSS = require('rss')
 const commonmark = require('commonmark')
 const ejs = require('ejs')
 const fs = require('fs')
@@ -28,30 +30,36 @@ glob.sync('templates/*.ejs').forEach(templateFile => {
 const posts = {}
 const tags = {}
 
+fs.mkdirSync(path.join('site', 'posts'))
 const postSources = glob.sync('posts/*.md')
 postSources.forEach(postFile => {
   const slug = path.basename(postFile, '.md')
   const read = fs.readFileSync(postFile, 'utf8')
   const { data, content } = grayMatter(read)
+  const dateObject = new Date(data.date)
+  const dateString = displayDate(dateObject)
   posts[slug] = {
     title: data.title,
-    subtitle: data.subtitle,
-    date: new Date(data.date),
+    description: data.description,
+    dateObject,
+    dateString,
     tags: data.tags,
-    href: `/${slug}`
+    href: `/posts/${slug}`
   }
   // Index tags.
   data.tags.forEach(tag => {
     if (!tags[tag]) tags[tag] = [slug]
     else tags[tag].push(slug)
   })
-  // Render post.
+  // Write post page.
   fs.writeFileSync(
-    path.join('site', `${slug}.html`),
+    path.join('site', 'posts', `${slug}.html`),
     templates.post({
+      blogTitle: meta.title,
       title: data.title,
-      subtitle: data.subtitle,
-      date: data.date,
+      description: data.description,
+      dateObject,
+      dateString,
       tags: data.tags.map(text => {
         return {
           text,
@@ -71,16 +79,18 @@ Object.keys(tags).forEach(text => {
   fs.writeFileSync(
     path.join('site', 'tags', `${slug}.html`),
     templates.tag({
+      blogTitle: meta.title,
       text,
       slug,
       posts: tags[text]
         .map(slug => {
           const record = posts[slug]
           return {
-            href: `/${slug}`,
+            href: record.href,
             title: record.title,
-            subtitle: record.subtitle,
-            date: record.date
+            description: record.description,
+            dateObject: record.dateObject,
+            dateString: record.dateString
           }
         })
         .sort(byDateDescending)
@@ -92,6 +102,7 @@ Object.keys(tags).forEach(text => {
 fs.writeFileSync(
   path.join('site', 'tags', 'index.html'),
   templates.tags({
+    blogTitle: meta.title,
     tags: Object.keys(tags).map(text => {
       const slug = tagToSlug(text)
       return {
@@ -107,7 +118,8 @@ fs.writeFileSync(
 fs.writeFileSync(
   path.join('site', 'index.html'),
   templates.index({
-    title: 'Blog Title',
+    blogTitle: meta.title,
+    description: meta.description,
     posts: Object.values(posts).sort(byDateDescending)
   })
 )
@@ -128,4 +140,43 @@ function renderMarkdown (markdown) {
   const writer = new commonmark.HtmlRenderer()
   const parsed = reader.parse(markdown)
   return writer.render(parsed)
+}
+
+const feed = new RSS({ title: meta.title, description: meta.description })
+Object.values(posts)
+  .sort(byDateDescending)
+  .forEach(post => {
+    feed.item({
+      title: post.title,
+      description: post.description,
+      date: post.dateObject.toISOString()
+    })
+  })
+fs.writeFileSync(
+  path.join('site', 'feed.xml'),
+  feed.xml({ indent: true })
+)
+
+function displayDate (date) {
+  const months = [
+    'January',
+    'February',
+    'March',
+    'Apil',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+  ]
+  let returned = ''
+  returned += months[date.getMonth()]
+  returned += ` ${date.getDate()}, `
+  returned += date.getFullYear()
+  const options = { hour12: false, hour: '2-digit', minute: '2-digit' }
+  returned += ` @ ${date.toLocaleTimeString('en-US', options)}`
+  return returned
 }

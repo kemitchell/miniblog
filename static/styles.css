@@ -13,3 +13,11 @@ nav[role=navigation] ol {
 nav[role=navigation] li {
   display: inline-block;
 }
+
+header[role=banner],
+nav[role=navigation],
+main[role=main],
+footer[role=contentinfo] {
+  margin: 0 auto;
+  max-width: 37rem;
+}

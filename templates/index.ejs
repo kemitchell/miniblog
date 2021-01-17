@@ -2,7 +2,7 @@
 <html lang=en-US>
 <head>
   <%- include('meta') %>
-  <title><%= title %></title>
+  <title><%= blogTitle %></title>
 </head>
 <body>
   <%- include('header') %>
@@ -12,7 +12,7 @@
     <% for (const post of posts) { %>
       <li>
         <a href="<%- post.href %>"><%= post.title %></a>
-        <time datetime="<%= post.date.toISOString() %>"><%= post.date %></time>
+        <time datetime="<%= post.dateObject.toISOString() %>"><%= post.dateString %></time>
       </li>
     <% } %>
     </ol>
