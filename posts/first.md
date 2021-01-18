@@ -1,7 +1,7 @@
 ---
 title: First
 description: a small subtitle
-date: Sat 16 Jan 2021 06:30:32 PM PST
+date: 2021-01-16T06:30:32Z
 tags: [First]
 ---
 
