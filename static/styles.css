@@ -29,3 +29,7 @@ a[href] {
 a[href]:hover {
   text-decoration: underline;
 }
+
+.posts .title {
+  display: block;
+}
