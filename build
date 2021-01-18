@@ -1,14 +1,30 @@
 #!node
-const meta = require('./meta')
 const RSS = require('rss')
-const commonmark = require('commonmark')
 const ejs = require('ejs')
 const fs = require('fs')
 const glob = require('glob')
 const grayMatter = require('gray-matter')
+const hljs = require('highlight.js')
+const meta = require('./meta')
 const path = require('path')
 const rimraf = require('rimraf')
 const spawnSync = require('child_process').spawnSync
+
+const markdown = require('markdown-it')({
+  html: true,
+  linkify: false,
+  typographer: true,
+  highlight: function (string, language) {
+    if (language && hljs.getLanguage(language)) {
+      try {
+        return hljs.highlight(language, string).value
+      } catch (error) {
+        return ''
+      }
+    }
+    return ''
+  }
+})
 
 // Remove and recreate web root.
 rimraf.sync('site')
@@ -248,11 +264,8 @@ glob.sync('site/**/*.html').forEach(file => {
 
 // Helper Functions
 
-function renderMarkdown (markdown) {
-  const reader = new commonmark.Parser({ smart: true })
-  const writer = new commonmark.HtmlRenderer()
-  const parsed = reader.parse(markdown)
-  return writer.render(parsed)
+function renderMarkdown (input) {
+  return markdown.render(input)
 }
 
 function displayDate (date) {
